@@ -9,14 +9,14 @@ Installation
 Just use go get.
 
 ```bash
-go get github.com/heetch/walidator
+go get github.com/heetch/walidator/v4
 ```
 
 And then just import the package into your own code.
 
 ```go
 import (
-	"github.com/heetch/walidator
+	"github.com/heetch/walidator/v4
 )
 ```
 
@@ -35,7 +35,7 @@ type NewUserRequest struct {
 }
 
 nur := NewUserRequest{Username: "something", Age: 20}
-if err := validator.Validate(nur); err != nil {
+if err := walidator.Validate(nur); err != nil {
 	// values not valid, deal with errors here
 }
 ```
