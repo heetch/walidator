@@ -103,20 +103,20 @@ longitude
 
 Custom validators
 
-It is possible to define custom validators by using SetValidationFunc.
+It is possible to define custom validators by using AddValidation.
 First, one needs to create a validation function.
 
 ```go
 // Very simple validator
-func notZZ(v interface{}, param string) error {
-	st := reflect.ValueOf(v)
-	if st.Kind() != reflect.String {
+func notZZ(t reflect.Type, param string) (walidator.ValidationFunc, error) {
+	if t.Kind() != reflect.String {
 		return errors.New("notZZ only validates strings")
 	}
-	if st.String() == "ZZ" {
-		return errors.New("value cannot be ZZ")
-	}
-	return nil
+    return func(v reflect.Value, r *walidator.ErrorReporter) {
+	    if v.String() == "ZZ" {
+		    r.Errorf("value cannot be ZZ")
+	    }
+    }, nil
 }
 ```
 
@@ -124,10 +124,11 @@ Then one needs to add it to the list of validators and give it a "tag"
 name.
 
 ```go
-validator.SetValidationFunc("notzz", notZZ)
+v := walidator.New()
+v.AddValidation("notzz", notZZ)
 ```
 
-Then it is possible to use the notzz validation tag. This will print
+Then, it is possible to use the `notzz` validation tag. This will print
 "Field A error: value cannot be ZZ"
 
 ```go
@@ -147,19 +148,16 @@ type T struct {
 	A int `foo:"nonzero" bar:"min=10"`
 }
 t := T{5}
-SetTag("foo")
-validator.Validate(t) // valid as it's nonzero
-SetTag("bar")
-validator.Validate(t) // invalid as it's less than 10
+v := walidator.New().WithTag("foo")
+v.Validate(t) // valid as it's nonzero
+v.WithTag("bar").Validate(t) // invalid as it's less than 10
 ```
 
 SetTag is probably better used with multiple validators.
 
 ```go
-fooValidator := validator.NewValidator()
-fooValidator.SetTag("foo")
-barValidator := validator.NewValidator()
-barValidator.SetTag("bar")
+fooValidator := walidator.New().WithTag("foo")
+barValidator := validator.New().WithTag("bar")
 fooValidator.Validate(t)
 barValidator.Validate(t)
 ```
