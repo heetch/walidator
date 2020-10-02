@@ -1,18 +1,18 @@
 Package Walidator
 ================
 
-Package walidator implements variable validations in struct fields
+Package walidator implements variable validations in struct fields.
 
 Installation
 ============
 
-Just use go get.
+Use go get.
 
 ```bash
 go get github.com/heetch/walidator/v4
 ```
 
-And then just import the package into your own code.
+And then import the package into your own code.
 
 ```go
 import (
@@ -76,7 +76,16 @@ nonzero
 	string it's "", for pointers is nil, etc.) For structs, it
 	will not check to see if the struct itself has all zero
 	values, instead use a pointer or put nonzero on the struct's
-	keys that you care about. (Usage: nonzero)
+	keys that you care about. For pointers, the pointer's value
+	is used to test for nonzero in addition to the pointer itself
+	not being nil. To only check that the field value is not nil,
+	use `required`.	(Usage: nonzero)
+
+required
+    This validates the field value is not nil.
+    Applies to pointers, interfaces, maps and slices.
+    Has no effect on other scalar types, and will return an error on any other type.
+    (Usage: required)
 
 regexp
 	Only valid for string types, it will validate that the
@@ -87,10 +96,6 @@ uuid
     Only valid for string types, it will validate the value matches
     the well-known universally unique identifier defined in
     RFC 4122. (Usage: uuid)
-
-required
-    This validates the value is required, that is a pointer is
-    nil. (Usage: required)
 
 latitude
     Valid for float64 and string along with pointers, it will validate
@@ -103,7 +108,7 @@ longitude
 
 Custom validators
 
-It is possible to define custom validators by using AddValidation.
+It is possible to define custom validators by using `AddValidation`.
 First, one needs to create a validation function.
 
 ```go
@@ -136,7 +141,7 @@ type T struct {
 	A string  `validate:"nonzero,notzz"`
 }
 t := T{"ZZ"}
-if errs := validator.Validate(t); errs != nil {
+if errs := v.Validate(t); errs != nil {
 	fmt.Printf("Field A error: %s\n", errs["A"][0])
 }
 ```
@@ -157,13 +162,12 @@ SetTag is probably better used with multiple validators.
 
 ```go
 fooValidator := walidator.New().WithTag("foo")
-barValidator := validator.New().WithTag("bar")
+barValidator := walidator.New().WithTag("bar")
 fooValidator.Validate(t)
 barValidator.Validate(t)
 ```
 
-This keeps the default validator's tag clean. Again, please refer to
-godocs for a lot of more examples and different uses.
+Please refer to godocs for a lot of more examples and different uses.
 
 Pull requests policy
 ====================
